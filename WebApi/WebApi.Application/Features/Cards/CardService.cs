@@ -24,11 +24,11 @@ public class CardService : ICardService
         _readRepository = readRepository;
     }
 
-    public async Task<Result<IQueryable<Card>>> GetAll(CancellationToken cancellationToken)
+    public async Task<Result<List<Card>>> GetAll(CancellationToken cancellationToken)
     {
         try
         {
-            return await Task.FromResult(Result.Of(_readRepository.GetAll()));
+            return await _readRepository.GetAll(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -36,7 +36,7 @@ public class CardService : ICardService
         }
     }
 
-    public async Task<Result<Guid>> InsertAsync(
+    public async Task<Result<Card>> InsertAsync(
         Option<Card> maybeCard,
         CancellationToken cancellationToken)
     {
@@ -48,57 +48,66 @@ public class CardService : ICardService
                     var returned =
                         await _writeRepository.InsertAsync(maybeCard, cancellationToken);
 
-                    return returned.Match<Result<Guid>>(
+                    return returned.Match<Result<Card>>(
                         errors => DomainValidatorError.New("Errors de domonio", errors),
-                        cardId => cardId);
+                        cardId => cardToAdd with { Id = cardId });
                 },
-                () => Result.Of<Guid>(InvalidObjectError.New("Card não pode ser nulo")));
+                () => Result.Of<Card>(InvalidObjectError.New("Card não pode ser nulo")));
         }
         catch (Exception ex)
         {
-            return Result.Of<Guid>(UnhandledError.New(ex.Message, ex));
+            return Result.Of<Card>(UnhandledError.New(ex.Message, ex));
         }
     }
 
-    public async Task<Result<Success>> RemoveAsync(
+    public async Task<Result<List<Card>>> RemoveAsync(
         Guid cardId,
-        CancellationToken cancellationToken)
+        CancellationToken token)
     {
         try
         {
             var maybeCard =
-                await _readRepository.FindAsync(cardId, cancellationToken);
+                await _readRepository.FindAsync(cardId, token);
 
             return await maybeCard
                 .MatchAsync(
-                    async card => await _writeRepository.RemoveAsync(card, cancellationToken),
+                    async card =>
+                    {
+                        var maybeRemoved = await _writeRepository.RemoveAsync(card, token);
+                        return await maybeRemoved.MapAsync(async _ => await _readRepository.GetAll(token));
+                    },
                     () => NotFoundError.New("Não encontrado card com id informado."));
         }
         catch (Exception ex)
         {
-            return Result.Of<Success>(UnhandledError.New(ex.Message, ex));
+            return UnhandledError.New(ex.Message, ex);
         }
     }
 
-    public async Task<Result<Success>> UpdateAsync(Option<Card> maybeCard, CancellationToken cancellationToken)
+    public async Task<Result<Card>> UpdateAsync(Option<Card> maybeCard, CancellationToken cancellationToken)
     {
         try
         {
             return await maybeCard
                 .MatchAsync(async cardToUpdate =>
                 {
+                    var cardOnDb = await _readRepository.FindAsync(cardToUpdate.Id, cancellationToken);
+
+                    if (cardOnDb.IsNone)
+                        return NotFoundError.New("Não foi encontrado card com id informado.");
+
                     var returned =
                         await _writeRepository.UpdateAsync(cardToUpdate, cancellationToken);
 
-                    return returned.Match<Result<Success>>(
+                    return returned.Match<Result<Card>>(
                         errors => DomainValidatorError.New("Errors de domonio", errors),
-                        cardId => cardId);
+                        _ => cardToUpdate);
                 },
-                () => Result.Of<Success>(InvalidObjectError.New("Card não pode ser nulo")));
+                () => Result.Of<Card>(InvalidObjectError.New("Card não pode ser nulo")));
         }
         catch (Exception ex)
         {
-            return Result.Of<Success>(UnhandledError.New(ex.Message, ex));
+            return Result.Of<Card>(UnhandledError.New(ex.Message, ex));
         }
     }
 }

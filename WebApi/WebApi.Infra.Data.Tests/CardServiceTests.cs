@@ -112,7 +112,7 @@ public class CardServiceTests
         };
         var maybeCard = await _cardService.InsertAsync(cardToInsert, default);
         var cardId = Guid.NewGuid();
-        maybeCard.Then(id => cardId = id);
+        maybeCard.Then(card => cardId = card.Id);
 
         // Action
         var response = await _cardService.UpdateAsync(cardToInsert with
@@ -171,7 +171,7 @@ public class CardServiceTests
         };
         var maybeCard = await _cardService.InsertAsync(cardToInsert, default);
         Guid cardId = default;
-        maybeCard.Then(id => cardId = id);
+        maybeCard.Then(card => cardId = card.Id);
 
         // Action
         var response = await _cardService.RemoveAsync(cardId, default);

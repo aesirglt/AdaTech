@@ -27,14 +27,16 @@ public class CardsController : ControllerBase
             Id = Guid.NewGuid()
         }, cancellationToken);
 
-        return result.Match<IActionResult>(id => Ok(id), err => StatusCode(err.Code))!;
+        return result.Match<IActionResult>(
+            createdCard => base.StatusCode(201, createdCard),
+            err => StatusCode(err.Code, err.Message))!;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Read()
+    public async Task<IActionResult> Read(CancellationToken cancellationToken)
     {
-        var result = await _cardService.GetAll(default);
-        return result.Match<IActionResult>(Ok, err => StatusCode(err.Code))!;
+        var result = await _cardService.GetAll(cancellationToken);
+        return result.Match<IActionResult>(Ok, err => StatusCode(err.Code, err.Message))!;
     }
 
     [HttpPut("{cardId}")]
@@ -48,13 +50,13 @@ public class CardsController : ControllerBase
             List = card.List
         }, cancellationToken);
 
-        return result.Match<IActionResult>(_ => Ok(), err => StatusCode(err.Code))!;
+        return result.Match<IActionResult>(Ok, err => StatusCode(err.Code, err.Message))!;
     }
 
     [HttpDelete("{cardId}")]
     public async Task<IActionResult> Delete([FromRoute] Guid cardId, CancellationToken cancellationToken)
     {
         var result = await _cardService.RemoveAsync(cardId, cancellationToken);
-        return result.Match<IActionResult>(_ => Ok(), err => StatusCode(err.Code))!;
+        return result.Match<IActionResult>(Ok, err => StatusCode(err.Code, err.Message))!;
     }
 }

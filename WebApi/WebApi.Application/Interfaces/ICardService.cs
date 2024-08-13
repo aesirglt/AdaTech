@@ -1,6 +1,5 @@
 ﻿namespace WebApi.Application.Interfaces;
 
-using FunctionalConcepts;
 using FunctionalConcepts.Options;
 using FunctionalConcepts.Results;
 using System.Linq;
@@ -8,8 +7,8 @@ using WebApi.Domain.Features.Cards;
 
 public interface ICardService
 {
-    Task<Result<Guid>> InsertAsync(Option<Card> maybeCard, CancellationToken cancellationToken);
-    Task<Result<IQueryable<Card>>> GetAll(CancellationToken cancellationToken);
-    Task<Result<Success>> UpdateAsync(Option<Card> maybeCard, CancellationToken cancellationToken);
-    Task<Result<Success>> RemoveAsync(Guid cardId, CancellationToken cancellationToken);
+    Task<Result<Card>> InsertAsync(Option<Card> maybeCard, CancellationToken cancellationToken);
+    Task<Result<List<Card>>> GetAll(CancellationToken cancellationToken);
+    Task<Result<Card>> UpdateAsync(Option<Card> maybeCard, CancellationToken cancellationToken);
+    Task<Result<List<Card>>> RemoveAsync(Guid cardId, CancellationToken cancellationToken);
 }

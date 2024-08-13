@@ -3,7 +3,6 @@
 using FunctionalConcepts.Options;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using WebApi.Domain.Bases;
 using WebApi.Domain.Interfaces;
@@ -29,8 +28,8 @@ public class ReadRepository<TEntity> : IReadRepository<TEntity> where TEntity : 
         return entity;
     }
 
-    public IQueryable<TEntity> GetAll()
+    public async Task<List<TEntity>> GetAll(CancellationToken cancellation)
     {
-        return _context.Set<TEntity>().AsNoTracking().AsQueryable();
+        return await _context.Set<TEntity>().AsNoTracking().ToListAsync(cancellation);
     }
 }

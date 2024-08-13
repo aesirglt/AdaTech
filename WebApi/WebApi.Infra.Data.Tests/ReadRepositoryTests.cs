@@ -109,7 +109,7 @@ public class ReadRepositoryTests
         await _kanbanContext.SaveChangesAsync();
 
         // Action
-        var maybeCard = _readRepository.GetAll().ToList();
+        var maybeCard = await _readRepository.GetAll(default);
 
         // Verify
         maybeCard.Count.Should().Be(expected: insertedCount);
@@ -119,10 +119,10 @@ public class ReadRepositoryTests
     }
 
     [Test]
-    public void ReadRepositoryTests_GetAllAsync_EmptyList_ShouldBeOk()
+    public async Task ReadRepositoryTests_GetAllAsync_EmptyList_ShouldBeOk()
     {
         // Action
-        var maybeCard = _readRepository.GetAll().ToList();
+        var maybeCard = await _readRepository.GetAll(default);
 
         // Verify
         maybeCard.Count.Should().Be(expected: 0);
