@@ -30,15 +30,13 @@ builder.Services.AddAuthentication(x =>
     x.SaveToken = true;
     x.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
+        ValidateIssuer = false,
+        ValidateAudience = false,
         ValidateLifetime = true
     };
 });
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers(options =>
 {

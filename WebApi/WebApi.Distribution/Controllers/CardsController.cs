@@ -8,7 +8,6 @@ using WebApi.Domain.Features.Cards;
 
 [Controller]
 [Route("[controller]")]
-[Authorize]
 public class CardsController : ControllerBase
 {
     private ICardService _cardService;
