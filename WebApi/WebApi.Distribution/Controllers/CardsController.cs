@@ -1,5 +1,6 @@
 ﻿namespace WebApi.Distribution.Controllers;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Application;
 using WebApi.Application.Interfaces;
@@ -7,6 +8,7 @@ using WebApi.Domain.Features.Cards;
 
 [Controller]
 [Route("[controller]")]
+[Authorize]
 public class CardsController : ControllerBase
 {
     private ICardService _cardService;
@@ -39,12 +41,12 @@ public class CardsController : ControllerBase
         return result.Match<IActionResult>(Ok, err => StatusCode(err.Code, err.Message))!;
     }
 
-    [HttpPut("{cardId}")]
-    public async Task<IActionResult> Update([FromRoute] Guid cardId, [FromBody] CardDto card, CancellationToken cancellationToken)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CardDto card, CancellationToken cancellationToken)
     {
         var result = await _cardService.UpdateAsync(new Card
         {
-            Id = cardId,
+            Id = id,
             Content = card.Content,
             Title = card.Title,
             List = card.List
@@ -54,9 +56,9 @@ public class CardsController : ControllerBase
     }
 
     [HttpDelete("{cardId}")]
-    public async Task<IActionResult> Delete([FromRoute] Guid cardId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var result = await _cardService.RemoveAsync(cardId, cancellationToken);
+        var result = await _cardService.RemoveAsync(id, cancellationToken);
         return result.Match<IActionResult>(Ok, err => StatusCode(err.Code, err.Message))!;
     }
 }

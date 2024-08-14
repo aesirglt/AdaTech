@@ -1,0 +1,19 @@
+version: '3.4'
+
+services:
+  webapi.distribution:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5000
+      - ASPNETCORE_HTTPS_PORTS=5001
+      - JWT_SECRET_KEY=your_secret_key_here
+      - JWT_ISSUER=your_issuer
+      - JWT_AUDIENCE=your_audience
+    ports:
+      - "5000"
+      - "5001"
+    env_file:
+      - .env
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
